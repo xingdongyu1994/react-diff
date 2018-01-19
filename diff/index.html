@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>React App</title>
+  </head>
+  <body>
+    <div id="button">点击</div>
+    <div id="root"></div>
+    <script>
+      var obj = {
+        nodeNmae: 'div',
+        nodeChildren: [
+           {
+            nodeNmae: 'p',
+            nodeChildren: ["111"]
+           },
+           {
+            nodeNmae: 'p',
+            nodeChildren: ["222"]
+           },
+           {
+            nodeNmae: 'p',
+            nodeChildren: ["333"]
+           }
+        ]
+      }
+      
+      function ObjNode (nodeName, nodeChildren) {
+        this.nodeName = nodeName,
+        this.nodeChildren = nodeChildren
+      }
+      function render (objnode) {
+        var nodeName = document.createElement(objnode.nodeName)
+        var nodeChildren = objnode.nodeChildren || []
+        for(var i=0; i<nodeChildren.length; i++) {
+          if(!nodeChildren[i].nodeChildren.nodeNmae) {
+            var TextNodeName = document.createElement(nodeChildren[i].nodeName) 
+            var TextNode = document.createTextNode(nodeChildren[i].nodeChildren)  
+            TextNodeName.appendChild(TextNode) 
+            nodeName.appendChild(TextNodeName) 
+          } else {
+            render(nodeChildren[i])
+          }     
+        }
+        return nodeName
+      }
+      var objnodech1p = new ObjNode('p',['111'])
+      var objnodech2p = new ObjNode('p',['222'])
+      var objnodech3p = new ObjNode('p',['333'])
+      var objnodediv1 = new ObjNode('div', [objnodech1p, objnodech2p, objnodech3p])
+
+      var oldnoderoot =render(objnodediv1)
+      document.body.appendChild(oldnoderoot) //旧dom
+
+    
+      var objnodech1span = new ObjNode('p', ['111'])
+      var objnodech2span = new ObjNode('p', ['222'])
+      var objnodech3span = new ObjNode('p', ['666'])
+      var objnodediv2 = new ObjNode('div', [objnodech1span, objnodech2span, objnodech3span])
+
+      var newnoderoot = render(objnodediv2)
+      document.body.appendChild(newnoderoot) //新dom
+
+      console.log("新dom",objnodediv1)
+      console.log("旧dom",objnodediv2)
+
+      var root = document.getElementById("root")
+    
+    
+      function nodeDiff(root, olddom, newdom) {
+        var index = 0
+        console.log("ggggggggggggg",dfsNode(root,olddom, newdom, index))
+      }
+      function dfsNode(root, olddom, newdom, index) {
+        function changeNode(node1, node2) {
+          return (
+            typeof node1 !== typeof node2 ||
+            typeof node1 === 'string' && node1 !== node2 ||
+            node1.type !== node2.type
+          )
+        }
+        console.log("kjhgfd111111",root)
+        if (olddom == null && newdom != null) {
+          root.appendChild(render(newdom))
+        }
+        if (olddom != null && newdom == null) {
+          root.removeChild(root.nodeChildren[index])
+        }
+        if(changeNode(olddom, newdom)) {
+          root.replaceChild(render(newdom), root.nodeChildren[index])
+        } else {
+          console.log("kjhgfd",olddom)
+          if( newdom.nodeChildren !==undefined) {
+            var newLength = newdom.nodeChildren.length
+            var oldLength = olddom.nodeChildren.length
+            
+          
+            for (let i = 0; i < newLength || i < oldLength; i++) {
+              dfsNode(root, olddom.nodeChildren[i], newdom.nodeChildren[i],i)
+            }  
+          }
+          
+        }
+      }
+      var button = document.getElementById("button")
+      button.addEventListener('click', function() {
+        nodeDiff(root, objnodediv1, objnodediv2)
+      })
+     
+    </script>
+  </body>
+</html>
